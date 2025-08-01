@@ -159,7 +159,7 @@ app.post('/signup', async (req, res) => {
               <p style="margin-bottom:0;font-size:1.08rem;">Here are your account details:</p>
               <ul class="details">
                 <li><strong>Account Number:</strong> <span class="account-number">${accountNumber}</span></li>
-                <li><strong>Name:</strong> ${firstName} ${lastName}</li>
+                <li><strong>Account Name:</strong> ${firstName} ${lastName}</li>
                 <li><strong>Email:</strong> ${email}</li>
                 <li><strong>Phone:</strong> ${phone}</li>
               </ul>
@@ -183,7 +183,7 @@ app.post('/signup', async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(501).json({ message: "user not saved" });
+    res.status(501).json({ message: "User account not created" });
   }
 
 })
@@ -200,14 +200,14 @@ app.post('/signin', (req,res) =>{
       if (!foundUser || foundUser == null) {
         res.status(401).json({message : "No user found"});
       } else {
-        bcrypt.compare(foundUser.password, userData.password)
+        bcrypt.compare(userData.password,foundUser.password)
         .then((isMatch)=>{
           if (isMatch) {
     
-            jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (err, token) =>{
+            jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (error, token) =>{
   
-              if(err) {
-              console.log(`Token not generated`, err);
+              if(error) {
+              console.log(`Token not generated`, error);
               return res.status(500).json({ message : 'Error generating token' });
   
               }else{
