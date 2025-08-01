@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
+const decode = require('jwt-decode')
 require('dotenv').config()
 const port = process.env.PORT || 8080
 const saltRounds = 10
@@ -204,10 +205,10 @@ app.post('/signin', (req,res) =>{
         .then((isMatch)=>{
           if (isMatch) {
     
-            jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (error, token) =>{
+            jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (err, token) =>{
   
-              if(error) {
-              console.log(`Token not generated`, error);
+              if(err) {
+              console.log(`Token not generated`, err);
               return res.status(500).json({ message : 'Error generating token' });
   
               }else{
@@ -226,6 +227,16 @@ app.post('/signin', (req,res) =>{
     .catch((err) => {
       console.log(`No user has been found with this email`, err);
     });
+})
+
+app.post('/decodetoken', (req,res)=>{
+    const token = req.body.token
+    jwt.verify(token, process.env.JWT_SECRET, (err, decode)=>{
+        if(err){
+            return res.status(401).send(`Invalid token`)
+        }
+        res.status(201).send(`${decode}`)
+    })
 })
 
 

@@ -23,6 +23,7 @@ const Signin = () => {
       try {
         const res = await axios.post(url, values);
         if (res.status === 200) {
+          localStorage.setItem('webVault',res.data.token)
           navigate('/dashboard');
         }
       } catch (err) {

@@ -1,6 +1,21 @@
 import React from "react";
+import { useEffect } from "react";
+// import axios from "axios"
+import jwt_decode from "jwt-decode";
 
 export default function Dashboard() {
+
+useEffect(() => {
+  const token = localStorage.getItem('webVault');
+  if (token) {
+  const decoded = jwt_decode(token);
+  console.log(decoded);
+}
+}, [])
+
+
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 flex flex-col">
       <header className="bg-white shadow-lg py-6 px-8 flex items-center justify-between">
@@ -15,7 +30,7 @@ export default function Dashboard() {
 
       <main className="flex-1 w-full max-w-5xl mx-auto py-10 px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-          {/* Account Summary Card */}
+
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-blue-700">
             <img src="https://i.imgur.com/2d72d9b.png" alt="WebVault Icon" className="w-16 h-16 mb-4" />
             <h2 className="text-xl font-bold text-blue-700 mb-2">Hello, John Doe</h2>
@@ -32,7 +47,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Quick Actions Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-blue-700">
             <h2 className="text-lg font-bold text-blue-700 mb-4">Quick Actions</h2>
             <div className="flex flex-col gap-4 w-full">
@@ -42,7 +56,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Notifications Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col border-t-4 border-blue-700">
             <h2 className="text-lg font-bold text-blue-700 mb-4">Notifications</h2>
             <ul className="space-y-3">
@@ -53,7 +66,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Transactions Table */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border-t-4 border-blue-700">
           <h2 className="text-lg font-bold text-blue-700 mb-6">Recent Transactions</h2>
           <div className="overflow-x-auto">
