@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 const cors = require('cors')
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const port = process.env.PORT || 8080
 const saltRounds = 10
@@ -188,6 +189,43 @@ app.post('/signup', async (req, res) => {
 })
 
 
+app.post('/signin', (req,res) =>{
+  const userData = {
+    email: req.body.email,
+    password: req.body.password,
+  };
+
+  userModel.findOne({ email: userData.email })
+    .then((foundUser) => {
+      if (!foundUser || foundUser == null) {
+        res.status(401).json({message : "No user found"});
+      } else {
+        const isMatch = bcrypt.compare(foundUser.password, userData.password)
+
+        if (isMatch) {
+  
+          jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (err, token) =>{
+
+            if(err) {
+            console.log(`Token not generated`, err);
+            return res.status(500).json({ message : 'Error generating token' });
+
+            }else{
+                console.log(token);
+                return res.status(200).json({message : 'User found and signed in', token});
+            }
+
+            })
+
+        } else {
+          res.status(401).json({message: "Invalid password"});
+        }
+      }
+    })
+    .catch((err) => {
+      console.log(`No user has been found with this email`, err);
+    });
+})
 
 
 
