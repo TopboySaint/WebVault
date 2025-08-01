@@ -200,26 +200,27 @@ app.post('/signin', (req,res) =>{
       if (!foundUser || foundUser == null) {
         res.status(401).json({message : "No user found"});
       } else {
-        const isMatch = bcrypt.compare(foundUser.password, userData.password)
-
-        if (isMatch) {
+        bcrypt.compare(foundUser.password, userData.password)
+        .then((isMatch)=>{
+          if (isMatch) {
+    
+            jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (err, token) =>{
   
-          jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (err, token) =>{
-
-            if(err) {
-            console.log(`Token not generated`, err);
-            return res.status(500).json({ message : 'Error generating token' });
-
-            }else{
-                console.log(token);
-                return res.status(200).json({message : 'User found and signed in', token});
-            }
-
-            })
-
-        } else {
-          res.status(401).json({message: "Invalid password"});
-        }
+              if(err) {
+              console.log(`Token not generated`, err);
+              return res.status(500).json({ message : 'Error generating token' });
+  
+              }else{
+                  console.log(token);
+                  return res.status(200).json({message : 'User found and signed in', token});
+              }
+  
+              })
+  
+          } else {
+            res.status(401).json({message: "Invalid password"});
+          }   
+        })
       }
     })
     .catch((err) => {
