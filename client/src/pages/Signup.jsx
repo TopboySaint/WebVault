@@ -2,12 +2,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios"
+import { useState } from "react";
 
 const Signup = () => {
-  const navigate = useNavigate()
-  const url = "http://localhost:8080/signup"
-
-
+  const navigate = useNavigate();
+  const url = "http://localhost:8080/signup";
+  const [serverError, setServerError] = useState("");
 
   const formik = useFormik({
     initialValues: {
@@ -18,7 +18,6 @@ const Signup = () => {
       password: '',
       confirmPassword: '',
     },
-
     validationSchema: Yup.object({
       firstName: Yup.string().required('First name is required'),
       lastName: Yup.string().required('Last name is required'),
@@ -27,20 +26,21 @@ const Signup = () => {
       password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
       confirmPassword: Yup.string().oneOf([Yup.ref('password'), null], 'Passwords must match').required('Confirm your password')
     }),
-
-    onSubmit: values => {
-      // console.log('data', values);  
-        axios.post(`${url}`, values) 
-        .then((res)=>{
-            console.log('response:', res);
-            if(res.status === 201){
-                navigate('/signin')
-            } 
-        }) 
-        .catch((err)=>{
-            console.log(`${err.message}`);
-            // alert('Not successful')   
-        })
+    onSubmit: async values => {
+      setServerError("");
+      try {
+        const res = await axios.post(url, values);
+        if (res.status === 201) {
+          navigate('/signin');
+        }
+      } catch (err) {
+        if (err.response && err.response.data && err.response.data.message) {
+          setServerError(err.response.data.message);
+        } else {
+          setServerError("Can't perform this action right now");
+        }
+        console.log(err);
+      }
     }
   });
 
@@ -56,6 +56,11 @@ const Signup = () => {
           Open Your WebVault Bank Account
         </h2>
         <form className="space-y-6" onSubmit={formik.handleSubmit}>
+          {serverError && (
+            <div className="text-red-600 text-base mb-4 text-center font-semibold bg-red-50 border border-red-200 rounded-lg py-2 px-4">
+              {serverError}
+            </div>
+          )}
           <div>
             <label className="block text-gray-700 mb-2 font-medium" htmlFor="firstName">First Name</label>
             <input

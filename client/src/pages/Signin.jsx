@@ -1,8 +1,16 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import axios from "axios"
+
+
+import React from "react";
 
 const Signin = () => {
+  const navigate = useNavigate();
+  const url = "http://localhost:8080/signin";
+  const [serverError, setServerError] = React.useState("");
+
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -12,9 +20,21 @@ const Signin = () => {
       email: Yup.string().email('Invalid email address').required('Email is required'),
       password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
     }),
-    onSubmit: values => {
-      // Handle sign in logic here
-      console.log(values);
+    onSubmit: async values => {
+      setServerError("");
+      try {
+        const res = await axios.post(url, values);
+        if (res.status === 200) {
+          navigate('/dashboard');
+        }
+      } catch (err) {
+        if (err.response && err.response.data && err.response.data.message) {
+          setServerError(err.response.data.message);
+        } else {
+          setServerError("Incorrect email or password");
+        }
+        console.log(err);
+      }
     },
   });
 
@@ -29,6 +49,11 @@ const Signin = () => {
           Sign In to WebVault
         </h2>
         <form className="space-y-6" onSubmit={formik.handleSubmit}>
+          {serverError && (
+            <div className="text-red-600 text-base mb-4 text-center font-semibold bg-red-50 border border-red-200 rounded-lg py-2 px-4">
+              {serverError}
+            </div>
+          )}
           <div>
             <label className="block text-gray-700 mb-2 font-medium" htmlFor="email">Email Address</label>
             <input
