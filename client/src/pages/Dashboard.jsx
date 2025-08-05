@@ -1,17 +1,22 @@
-import React from "react";
-import { useEffect } from "react";
-// import axios from "axios"
-import jwt_decode from "jwt-decode";
+import React, { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
-export default function Dashboard() {
+const Dashboard = () => {
+  const [user, setUser] = useState(null);
 
-useEffect(() => {
-  const token = localStorage.getItem('webVault');
-  if (token) {
-  const decoded = jwt_decode(token);
-  console.log(decoded);
-}
-}, [])
+  useEffect(() => {
+    const token = localStorage.getItem('webVault');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUser(decoded.user); // Access the user data from the token
+        console.log(decoded.user);
+      } catch (error) {
+        console.error("Invalid token:", error);
+        // Redirect to login if token is invalid
+      }
+    }
+  }, [])
 
 
 
@@ -32,19 +37,19 @@ useEffect(() => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
 
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-blue-700">
-            <img src="https://i.imgur.com/2d72d9b.png" alt="WebVault Icon" className="w-16 h-16 mb-4" />
-            <h2 className="text-xl font-bold text-blue-700 mb-2">Hello, John Doe</h2>
-            <p className="text-gray-600 mb-4">Account Number: <span className="font-semibold text-blue-700">1234567890</span></p>
-            <div className="flex gap-4">
-              <div className="text-center">
+            <h2 className="text-xl font-bold text-blue-700 mb-2">
+              Hello, {user ? `${user.firstName} ${user.lastName}` : "User"}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Account Number: <span className="font-semibold text-blue-700">
+                {user ? user.accountNumber || "Loading..." : "Loading..."}
+              </span>
+            </p>
+
+              <div className="text-center border p-5 w-32 rounded-lg">
                 <span className="block text-lg font-bold text-blue-700">₦500,000</span>
                 <span className="text-xs text-gray-500">Balance</span>
               </div>
-              <div className="text-center">
-                <span className="block text-lg font-bold text-green-600">₦20,000</span>
-                <span className="text-xs text-gray-500">Investments</span>
-              </div>
-            </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-blue-700">
@@ -115,3 +120,5 @@ useEffect(() => {
     </div>
   );
 }
+
+export default Dashboard
