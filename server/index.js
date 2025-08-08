@@ -16,11 +16,11 @@ app.use(cors())
 
 
 mongoose.connect(uri)
-  .then((res) => {
+  .then(() => {
     console.log(`Mongo database is now connected.`);
   })
   .catch((err) => {
-    console.log(`Error connecting to Mongo database.`);
+    console.log(`Error connecting to Mongo database.`, err);
   })
 
 
@@ -41,8 +41,9 @@ const userModel = mongoose.model('User', userSchema);
 app.post('/signup', async (req, res) => {
   const { firstName, lastName, phone, password } = req.body;
   const email = req.body.email.toLowerCase();
-  try {
 
+  try {
+    
     const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -90,7 +91,7 @@ app.post('/signin', (req,res) =>{
   userModel.findOne({ email: userData.email })
     .then((foundUser) => {
       if (!foundUser || foundUser == null) {
-        res.status(401).json({message : "No user found"});
+        res.status(401).json({message : "No user was found with this e-Mail !"});
       } else {
         bcrypt.compare(userData.password,foundUser.password)
         .then((isMatch)=>{
@@ -115,6 +116,7 @@ app.post('/signin', (req,res) =>{
         })
         .catch((err)=>{
           console.log(`Password did not match`);
+          res.status(500).json({ message: "Password did not match" })
         })
       }
     })
