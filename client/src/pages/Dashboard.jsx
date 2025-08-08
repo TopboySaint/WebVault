@@ -4,6 +4,10 @@ import { jwtDecode } from "jwt-decode";
 const Dashboard = () => {
   const [user, setUser] = useState(null);
 
+  const formatBalance = (balance) => {
+    return balance?.toLocaleString() || "0";
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('webVault');
     if (token) {
@@ -47,7 +51,7 @@ const Dashboard = () => {
             </p>
 
               <div className="text-center border p-5 w-32 rounded-lg">
-                <span className="block text-lg font-bold text-blue-700">₦500,000</span>
+                <span className="block text-lg font-bold text-blue-700"> ₦{user ? formatBalance(user.balance) : "Loading..."}</span>
                 <span className="text-xs text-gray-500">Balance</span>
               </div>
           </div>

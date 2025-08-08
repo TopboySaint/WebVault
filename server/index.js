@@ -50,7 +50,7 @@ app.post('/signup', async (req, res) => {
     await user.save();
 
     console.log("user saved successfully");
-    res.status(201).json({ message: "user saved successfully", accountNumber });
+    res.status(201).json({ message: "User account has been created !", accountNumber });
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -75,7 +75,7 @@ app.post('/signup', async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(501).json({ message: "User account not created" });
+    res.status(500).json({ message: "User account not created" });
   }
 
 })
@@ -104,7 +104,7 @@ app.post('/signin', (req,res) =>{
   
               }else{
                   console.log(token);
-                  return res.status(200).json({message : 'User found and signed in', token});
+                  return res.status(200).json({message : 'User found and signed in !', token});
               }
   
               })
@@ -113,6 +113,9 @@ app.post('/signin', (req,res) =>{
             res.status(401).json({message: "Invalid password"});
           }   
         })
+        .catch((err)=>{
+          console.log(`Password did not match`);
+        })
       }
     })
     .catch((err) => {
@@ -120,15 +123,56 @@ app.post('/signin', (req,res) =>{
     });
 })
 
-app.post('/decodetoken', (req,res)=>{
-    const token = req.body.token
-    jwt.verify(token, process.env.JWT_SECRET, (err, decode)=>{
-        if(err){
-            return res.status(401).send(`Invalid token`)
-        }
-        res.status(201).send(`${decode}`)
-    })
-})
+
+app.post('/transfer', async (req, res) => {
+  const { token, recipientAccountNumber, amount } = req.body;
+  
+  try {
+    // Verify the token and get sender info
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const senderId = decoded.user._id;
+    
+    // Validate amount
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid transfer amount" });
+    }
+    
+    // Find sender and recipient
+    const sender = await userModel.findById(senderId);
+    const recipient = await userModel.findOne({ accountNumber: recipientAccountNumber });
+    
+    if (!recipient) {
+      return res.status(404).json({ message: "Recipient account not found" });
+    }
+    
+    if (sender.accountNumber === recipientAccountNumber) {
+      return res.status(400).json({ message: "Cannot transfer to your own account" });
+    }
+    
+    // Check if sender has sufficient balance
+    if (sender.balance < amount) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+    
+    // Perform the transfer
+    sender.balance -= amount;
+    recipient.balance += amount;
+    
+    // Save both users
+    await sender.save();
+    await recipient.save();
+    
+    res.status(200).json({ 
+      message: "Transfer successful", 
+      newBalance: sender.balance,
+      recipientName: `${recipient.firstName} ${recipient.lastName}`
+    });
+    
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Transfer failed" });
+  }
+});
 
 
 
