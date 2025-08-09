@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 const cors = require('cors')
 const jwt = require('jsonwebtoken')
-const decode = require('jwt-decode')
 require('dotenv').config()
 const welcomeEmailTemplate = require('./emailTemplates/welcomeMail')
 const port = process.env.PORT || 8080
@@ -40,6 +39,7 @@ const userModel = mongoose.model('User', userSchema);
 
 app.post('/signup', async (req, res) => {
   const { firstName, lastName, phone, password } = req.body;
+
   const email = req.body.email.toLowerCase();
 
   try {
@@ -47,10 +47,13 @@ app.post('/signup', async (req, res) => {
     const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const user = new userModel({ firstName, lastName, email, phone, password: hashedPassword, accountNumber });
+
     await user.save();
 
     console.log("user saved successfully");
+
     res.status(201).json({ message: "User account has been created !", accountNumber });
 
     const transporter = nodemailer.createTransport({
@@ -70,10 +73,12 @@ app.post('/signup', async (req, res) => {
 
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        return res.status(500).send(`Error sending mail: ${error.message}`);
+        console.log(`Error sending mail: ${error.message}`);
+      } else {
+        console.log(`Email sent successfully: ${info.response}`);
       }
-      res.status(201).send(`Email sent successfully: ${info.response}`);
     });
+
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "User account not created" });
@@ -82,99 +87,43 @@ app.post('/signup', async (req, res) => {
 })
 
 
-app.post('/signin', (req,res) =>{
-  const userData = {
-    email: req.body.email.toLowerCase(),
-    password: req.body.password,
-  };
-
-  userModel.findOne({ email: userData.email })
-    .then((foundUser) => {
-      if (!foundUser || foundUser == null) {
-        res.status(401).json({message : "No user was found with this e-Mail !"});
-      } else {
-        bcrypt.compare(userData.password,foundUser.password)
-        .then((isMatch)=>{
-          if (isMatch) {
-    
-            jwt.sign({user: foundUser}, process.env.JWT_SECRET, {expiresIn: "10m"}, (err, token) =>{
-  
-              if(err) {
-              console.log(`Token not generated`, err);
-              return res.status(500).json({ message : 'Error generating token' });
-  
-              }else{
-                  console.log(token);
-                  return res.status(200).json({message : 'User found and signed in !', token});
-              }
-  
-              })
-  
-          } else {
-            res.status(401).json({message: "Invalid password"});
-          }   
-        })
-        .catch((err)=>{
-          console.log(`Password did not match`);
-          res.status(500).json({ message: "Password did not match" })
-        })
-      }
-    })
-    .catch((err) => {
-      console.log(`No user has been found with this email`, err);
-    });
-})
-
-
-app.post('/transfer', async (req, res) => {
-  const { token, recipientAccountNumber, amount } = req.body;
-  
+app.post('/signin', async (req, res) => {
   try {
-    // Verify the token and get sender info
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const senderId = decoded.user._id;
-    
-    // Validate amount
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: "Invalid transfer amount" });
+    const email = req.body.email.toLowerCase();
+    const password = req.body.password;
+
+    const foundUser = await userModel.findOne({ email });
+
+    if (!foundUser) {
+      return res.status(401).json({ message: "User not found" });
     }
-    
-    // Find sender and recipient
-    const sender = await userModel.findById(senderId);
-    const recipient = await userModel.findOne({ accountNumber: recipientAccountNumber });
-    
-    if (!recipient) {
-      return res.status(404).json({ message: "Recipient account not found" });
+
+    const isMatch = await bcrypt.compare(password, foundUser.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password" });
     }
-    
-    if (sender.accountNumber === recipientAccountNumber) {
-      return res.status(400).json({ message: "Cannot transfer to your own account" });
-    }
-    
-    // Check if sender has sufficient balance
-    if (sender.balance < amount) {
-      return res.status(400).json({ message: "Insufficient balance" });
-    }
-    
-    // Perform the transfer
-    sender.balance -= amount;
-    recipient.balance += amount;
-    
-    // Save both users
-    await sender.save();
-    await recipient.save();
-    
-    res.status(200).json({ 
-      message: "Transfer successful", 
-      newBalance: sender.balance,
-      recipientName: `${recipient.firstName} ${recipient.lastName}`
-    });
-    
+
+    jwt.sign({ user: foundUser }, process.env.JWT_SECRET, { expiresIn: "10m" }, (err, token) => {
+        if (err) {
+          console.log(`Token not generated`, err);
+          return res.status(500).json({ message: 'Error generating token' });
+        }
+
+        return res.status(200).json({ message: 'User found and signed in!', token });
+
+      });
+
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Transfer failed" });
+    console.log(`Signin error:`, err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
+
+
 
 
 

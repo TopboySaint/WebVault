@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 const Dashboard = () => {
@@ -8,19 +9,21 @@ const Dashboard = () => {
     return balance?.toLocaleString() || "0";
   };
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     const token = localStorage.getItem('webVault');
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUser(decoded.user); // Access the user data from the token
-        console.log(decoded.user);
+        // console.log(decoded.user);
+        setUser(decoded.user);
       } catch (error) {
         console.error("Invalid token:", error);
-        // Redirect to login if token is invalid
+        navigate('/signin')
       }
     }
-  }, [])
+  }, [navigate])
 
 
 
