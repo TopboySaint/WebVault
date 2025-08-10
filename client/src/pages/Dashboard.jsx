@@ -1,9 +1,16 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [showSendMoney, setShowSendMoney] = useState(false);
+  const [sendAccount, setSendAccount] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
+  const [sendSuccess, setSendSuccess] = useState("");
 
   const formatBalance = (balance) => {
     return balance?.toLocaleString() || "0";
@@ -62,7 +69,103 @@ const Dashboard = () => {
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center border-t-4 border-blue-700">
             <h2 className="text-lg font-bold text-blue-700 mb-4">Quick Actions</h2>
             <div className="flex flex-col gap-4 w-full">
-              <button className="bg-blue-700 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition">Send Money</button>
+              <button
+                className="bg-blue-700 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition"
+                onClick={() => setShowSendMoney(true)}
+              >
+                Send Money
+              </button>
+
+      {showSendMoney && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border-t-4 border-blue-700 relative animate-fadeIn">
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-blue-700 text-2xl font-bold focus:outline-none"
+              onClick={() => {
+                setShowSendMoney(false);
+                setSendAccount("");
+                setSendAmount("");
+                setSendError("");
+                setSendSuccess("");
+              }}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <h3 className="text-xl font-bold text-blue-700 mb-4 text-center">Send Money</h3>
+            <form
+              onSubmit={async e => {
+                e.preventDefault();
+                setSendError("");
+                setSendSuccess("");
+                if (!sendAccount || !sendAmount) {
+                  setSendError("Please fill in all fields.");
+                  return;
+                }
+                if (isNaN(sendAmount) || Number(sendAmount) <= 0) {
+                  setSendError("Enter a valid amount.");
+                  return;
+                }
+                if (!user || !user.accountNumber) {
+                  setSendError("User account not loaded.");
+                  return;
+                }
+                setSending(true);
+                try {
+                  const res = await axios.post("http://localhost:8080/transfer", {
+                    senderAccountNumber: user.accountNumber,
+                    recipientAccountNumber: sendAccount,
+                    amount: sendAmount
+                  });
+                  setSendSuccess(res.data.message || "Transfer successful!");
+                  setUser(prev => ({ ...prev, balance: res.data.senderBalance }));
+                  setSendAccount("");
+                  setSendAmount("");
+                } catch (err) {
+                  if (err.response && err.response.data && err.response.data.message) {
+                    setSendError(err.response.data.message);
+                  } else {
+                    setSendError("Network error. Please try again.");
+                  }
+                } finally {
+                  setSending(false);
+                }
+              }}
+              className="flex flex-col gap-4"
+            >
+              <label className="text-sm font-semibold text-gray-700">Account Number</label>
+              <input
+                type="text"
+                className="border border-blue-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Enter account number"
+                value={sendAccount}
+                onChange={e => setSendAccount(e.target.value)}
+                maxLength={12}
+                required
+              />
+              <label className="text-sm font-semibold text-gray-700">Amount (₦)</label>
+              <input
+                type="number"
+                className="border border-blue-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Enter amount"
+                value={sendAmount}
+                onChange={e => setSendAmount(e.target.value)}
+                min={1}
+                required
+              />
+              {sendError && <div className="text-red-600 text-sm text-center">{sendError}</div>}
+              {sendSuccess && <div className="text-green-600 text-sm text-center">{sendSuccess}</div>}
+              <button
+                type="submit"
+                className="bg-blue-700 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition mt-2 disabled:opacity-60"
+                disabled={sending}
+              >
+                {sending ? "Transferring..." : "Transfer"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
               <button className="bg-blue-100 text-blue-700 py-2 rounded-lg font-semibold hover:bg-blue-200 transition">Invest</button>
               <button className="bg-gray-100 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition">View Statements</button>
             </div>
