@@ -11,6 +11,15 @@ const Dashboard = () => {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const [sendSuccess, setSendSuccess] = useState("");
+  const [notifications, setNotifications] = useState([])
+
+  useEffect(() => {
+    if (user && user.accountNumber) {
+      axios.get(`http://localhost:8080/notifications/${user.accountNumber}`)
+        .then(res => setNotifications(res.data))
+        .catch(() => setNotifications([]));
+    }
+  }, [user]);
 
   const formatBalance = (balance) => {
     return balance?.toLocaleString() || "0";
@@ -174,9 +183,16 @@ const Dashboard = () => {
           <div className="bg-white rounded-2xl shadow-lg p-8 flex flex-col border-t-4 border-blue-700">
             <h2 className="text-lg font-bold text-blue-700 mb-4">Notifications</h2>
             <ul className="space-y-3">
-              <li className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm">Your account was credited with ₦100,000</li>
-              <li className="bg-green-50 text-green-700 px-4 py-2 rounded-lg text-sm">Investment matured: ₦20,000</li>
-              <li className="bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm">Monthly statement is ready</li>
+              {notifications.length === 0 && <li>No notifications yet.</li>}
+              {notifications.map((notification, i) => (
+                <li key={i} className={`px-4 py-2 rounded-lg text-sm ${
+                  notification.type === 'credit' ? 'bg-green-50 text-green-700' :
+                  notification.type === 'debit' ? 'bg-blue-50 text-blue-700' :
+                  'bg-gray-50 text-gray-700'
+                }`}>
+                  {notification.message}
+                </li>
+              ))}
             </ul>
           </div>
         </div>

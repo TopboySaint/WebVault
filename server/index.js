@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
     {
       message: {type: String},
       date: { type: Date, default: Date.now },
+      type: {type: String}
     }
   ]
 });
@@ -187,7 +188,17 @@ app.post('/transfer', async (req, res) => {
 });
 
 
-
+app.get('/notifications/:accountNumber', async (req, res) => {
+  try {
+    const user = await userModel.findOne({ accountNumber: req.params.accountNumber });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user.notifications);
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 
 
