@@ -31,7 +31,13 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   accountNumber: { type: String, required: true, unique: true },
   balance: { type: Number, default: 50000 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  notifications: [
+    {
+      message: {type: String},
+      date: { type: Date, default: Date.now },
+    }
+  ]
 });
 
 const userModel = mongoose.model('User', userSchema);
@@ -43,7 +49,7 @@ app.post('/signup', async (req, res) => {
   const email = req.body.email.toLowerCase();
 
   try {
-    
+
     const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString();
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -105,14 +111,14 @@ app.post('/signin', async (req, res) => {
     }
 
     jwt.sign({ user: foundUser }, process.env.JWT_SECRET, { expiresIn: "10m" }, (err, token) => {
-        if (err) {
-          console.log(`Token not generated`, err);
-          return res.status(500).json({ message: 'Error generating token' });
-        }
+      if (err) {
+        console.log(`Token not generated`, err);
+        return res.status(500).json({ message: 'Error generating token' });
+      }
 
-        return res.status(200).json({ message: 'User found and signed in!', token });
+      return res.status(200).json({ message: 'User found and signed in!', token });
 
-      });
+    });
 
   } catch (err) {
     console.log(`Signin error:`, err);
@@ -129,7 +135,7 @@ app.post('/transfer', async (req, res) => {
     if (!senderAccountNumber || !recipientAccountNumber || !transferAmount) {
       return res.status(400).json({ message: 'All fields are required.' });
     }
-    
+
     if (transferAmount <= 0) {
       return res.status(400).json({ message: 'Amount must be greater than zero.' });
     }
@@ -141,15 +147,15 @@ app.post('/transfer', async (req, res) => {
     if (!sender) {
       return res.status(404).json({ message: 'Sender not found.' });
     }
-    
+
     if (!recipient) {
       return res.status(404).json({ message: 'Recipient not found.' });
     }
-    
+
     if (sender.accountNumber === recipient.accountNumber) {
       return res.status(400).json({ message: 'Cannot send money to your own account.' });
     }
-    
+
     if (sender.balance < transferAmount) {
       return res.status(400).json({ message: 'Insufficient balance.' });
     }
@@ -157,6 +163,15 @@ app.post('/transfer', async (req, res) => {
     // Perform transfer
     sender.balance -= transferAmount;
     recipient.balance += transferAmount;
+
+    sender.notifications.unshift({
+      message: `You sent ₦${transferAmount.toLocaleString()} to account ${recipientAccountNumber}`,
+      type: 'debit'
+    });
+    recipient.notifications.unshift({
+      message: `You received ₦${transferAmount.toLocaleString()} from account ${senderAccountNumber}`,
+      type: 'credit'
+    });
 
     await sender.save();
     await recipient.save();
