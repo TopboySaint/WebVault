@@ -33,13 +33,19 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    if (user?.accountNumber) {
+      fetchLatestUser(user.accountNumber);
+    }
+  }, [user?.accountNumber]);
+
   const fetchLatestUser = async (accountNumber) => {
   try {
     const res = await axios.get(`http://localhost:8080/user/${accountNumber}`);
     setUser(res.data);
   } catch (err) {
     console.log(err);
-    
+    setSendError("Failed to refresh user data. Please try again.");  
   }
 };
 
@@ -67,11 +73,7 @@ const Dashboard = () => {
         amount: sendAmount,
       });
       setSendSuccess(res.data.message || "Transfer successful!");
-      setUser((prev) => ({
-        ...prev,
-        balance: res.data.senderBalance,
-      }));
-      fetchLatestUser(user.accountNumber)
+      await fetchLatestUser(user.accountNumber)
       setSendAccount("");
       setSendAmount("");
     } catch (err) {

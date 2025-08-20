@@ -194,12 +194,24 @@ app.get('/notifications/:accountNumber', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    res.json(user.notifications || []);
   } catch (err) {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
+app.get('/user/:accountNumber', async (req, res) => {
+  try {
+    const user = await userModel.findOne({ accountNumber: req.params.accountNumber }).select('-password -__v');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.log('Fetch user error:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 
 
