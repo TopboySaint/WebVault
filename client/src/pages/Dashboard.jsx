@@ -13,20 +13,11 @@ const Dashboard = () => {
   const [sendSuccess, setSendSuccess] = useState("");
   const [notifications, setNotifications] = useState([]);
 
-  useEffect(() => {
-    if (user && user.accountNumber) {
-      axios
-        .get(`http://localhost:8080/notifications/${user.accountNumber}`)
-        .then((res) => setNotifications(res.data))
-        .catch(() => setNotifications([]));
-    }
-  }, [user]);
+  const navigate = useNavigate();
 
   const formatBalance = (balance) => {
     return balance?.toLocaleString() || "0";
   };
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("webVault");
@@ -41,6 +32,16 @@ const Dashboard = () => {
       }
     }
   }, [navigate]);
+
+  const fetchLatestUser = async (accountNumber) => {
+  try {
+    const res = await axios.get(`http://localhost:8080/user/${accountNumber}`);
+    setUser(res.data);
+  } catch (err) {
+    console.log(err);
+    
+  }
+};
 
   const sendMoney = async (e) => {
     e.preventDefault();
@@ -70,6 +71,7 @@ const Dashboard = () => {
         ...prev,
         balance: res.data.senderBalance,
       }));
+      fetchLatestUser(user.accountNumber)
       setSendAccount("");
       setSendAmount("");
     } catch (err) {
@@ -80,6 +82,15 @@ const Dashboard = () => {
       }
     } 
   };
+
+  useEffect(() => {
+    if (user && user.accountNumber) {
+      axios
+        .get(`http://localhost:8080/notifications/${user.accountNumber}`)
+        .then((res) => setNotifications(Array.isArray(res.data) ? res.data : []))
+        .catch(() => setNotifications([]));
+    }
+  }, [user]);
 
   const logout = () => {
     const confirmation = confirm("Are you sure you want to logout?");
