@@ -6,7 +6,7 @@ import { useState } from "react";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const url = "http://localhost:8080/signup";
+  const url = "https://webvault-9uhh.onrender.com/signup";
   const [serverError, setServerError] = useState("");
 
   const formik = useFormik({

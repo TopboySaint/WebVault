@@ -44,7 +44,7 @@ const Dashboard = () => {
   const fetchLatestUser = async (accountNumber) => {
     setLoadingNotifications(true);
   try {
-    const res = await axios.get(`http://localhost:8080/user/${accountNumber}`);
+    const res = await axios.get(`https://webvault-9uhh.onrender.com/user/${accountNumber}`);
     setUser(res.data);
   } catch (err) {
     console.log(err);
@@ -73,7 +73,7 @@ const Dashboard = () => {
     }
     setSending(true);
     try {
-      const res = await axios.post("http://localhost:8080/transfer", {
+      const res = await axios.post("https://webvault-9uhh.onrender.com/transfer", {
         senderAccountNumber: user.accountNumber,
         recipientAccountNumber: sendAccount,
         amount: sendAmount,
@@ -94,7 +94,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (user && user.accountNumber) {
       axios
-        .get(`http://localhost:8080/notifications/${user.accountNumber}`)
+        .get(`https://webvault-9uhh.onrender.com/notifications/${user.accountNumber}`)
         .then((res) => setNotifications(Array.isArray(res.data) ? res.data : []))
         .catch(() => setNotifications([]));
     }
