@@ -34,15 +34,22 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   notifications: [
     {
-      message: {type: String},
+      message: { type: String },
       date: { type: Date, default: Date.now },
-      type: {type: String}
+      type: { type: String }
     }
   ]
 });
 
 const userModel = mongoose.model('User', userSchema);
 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Welcome to WebVault!',
+    version: '1.0.0',
+  });
+});
 
 app.post('/signup', async (req, res) => {
   const { firstName, lastName, phone, password } = req.body;
