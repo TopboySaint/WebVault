@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema({
 
 const userModel = mongoose.model('User', userSchema);
 
+app.use(cors({
+    origin: ['http://localhost:5173',"https://web-vault-alpha.vercel.app",'http://localhost:5174'],
+    credentials: true,
+  }));
+
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -224,5 +229,4 @@ app.get('/user/:accountNumber', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`The question isn't who is going to let me, it's who is going to stop me. - ${port} running.`);
-
 })
