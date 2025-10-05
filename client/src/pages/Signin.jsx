@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useState } from 'react';
-import { api } from '../api/axios';
+import api from '../api/axios';
 
 const Signin = () => {
   const navigate = useNavigate();
