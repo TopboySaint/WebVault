@@ -29,16 +29,6 @@ server/        Express API + Mongo models + mail template
 Base URL (dev): http://localhost:8080  
 Deployed (used by client): https://webvault-9uhh.onrender.com
 
-| Method | Endpoint | Body (JSON) | Description |
-| ------ | -------- | ----------- | ----------- |
-| POST | `/signup` | firstName,lastName,email,phone,password | Create user, send welcome email |
-| POST | `/signin` | email,password | Issue JWT (10m expiry) |
-| POST | `/transfer` | senderAccountNumber,recipientAccountNumber,amount | Move funds + notifications |
-| GET | `/notifications/:accountNumber` | — | List notifications (array) |
-| GET | `/user/:accountNumber` | — | Get user (sans password) |
-| GET | `/` | — | Health/info |
-
-
 ## Local Development
 
 ```
