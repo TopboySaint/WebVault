@@ -1,7 +1,7 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { api } from '../api/axios';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -44,7 +44,7 @@ const Dashboard = () => {
   const fetchLatestUser = async (accountNumber) => {
     setLoadingNotifications(true);
   try {
-    const res = await axios.get(`https://webvault-9uhh.onrender.com/user/${accountNumber}`);
+    const res = await api.get(`/user/${accountNumber}`);
     setUser(res.data);
   } catch (err) {
     console.log(err);
@@ -73,7 +73,7 @@ const Dashboard = () => {
     }
     setSending(true);
     try {
-      const res = await axios.post("https://webvault-9uhh.onrender.com/transfer", {
+      const res = await api.post('/transfer', {
         senderAccountNumber: user.accountNumber,
         recipientAccountNumber: sendAccount,
         amount: sendAmount,
@@ -93,8 +93,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user && user.accountNumber) {
-      axios
-        .get(`https://webvault-9uhh.onrender.com/notifications/${user.accountNumber}`)
+      api
+        .get(`/notifications/${user.accountNumber}`)
         .then((res) => setNotifications(Array.isArray(res.data) ? res.data : []))
         .catch(() => setNotifications([]));
     }

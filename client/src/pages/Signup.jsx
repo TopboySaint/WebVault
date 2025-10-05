@@ -1,12 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import axios from "axios"
 import { useState } from "react";
+import { api } from '../api/axios';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const url = "https://webvault-9uhh.onrender.com/signup";
   const [serverError, setServerError] = useState("");
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
@@ -31,7 +30,7 @@ const Signup = () => {
       setServerError("");
       setIsCreatingAccount(true);
       try {
-        const res = await axios.post(url, values);
+        const res = await api.post('/signup', values);
         if (res.status === 201) {
           navigate('/signin');
         }
@@ -47,9 +46,6 @@ const Signup = () => {
       }
     }
   });
-
-  // console.log(formik.values);
-  // console.log(formik.errors);
 
 
 

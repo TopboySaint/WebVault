@@ -1,13 +1,12 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import axios from "axios"
 import { useState } from 'react';
+import { api } from '../api/axios';
 
 const Signin = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const url = "https://webvault-9uhh.onrender.com/signin";
   const [serverError, setServerError] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
 
@@ -27,7 +26,7 @@ const Signin = () => {
       setServerError("");
       setIsSigningIn(true);
       try {
-        const res = await axios.post(url, values);
+        const res = await api.post('/signin', values);
         if (res.status === 200) {
           localStorage.setItem('webVault',res.data.token)
           navigate(from, { replace: true });
