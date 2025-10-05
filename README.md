@@ -41,7 +41,7 @@ node index.js
 ```
 cd client
 npm run dev
-``
+
 
 ## Future Improvements
 - Pagination for notifications
