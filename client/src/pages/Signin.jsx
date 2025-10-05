@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios"
@@ -6,8 +6,12 @@ import { useState } from 'react';
 
 const Signin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const url = "https://webvault-9uhh.onrender.com/signin";
   const [serverError, setServerError] = useState("");
+
+  // Get the intended destination from location state, default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const formik = useFormik({
     initialValues: {
@@ -24,7 +28,7 @@ const Signin = () => {
         const res = await axios.post(url, values);
         if (res.status === 200) {
           localStorage.setItem('webVault',res.data.token)
-          navigate('/dashboard');
+          navigate(from, { replace: true });
         }
       } catch (err) {
         if (err.response && err.response.data && err.response.data.message) {

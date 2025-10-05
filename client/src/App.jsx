@@ -9,6 +9,8 @@ import Signup from './pages/Signup'
 import Signin from './pages/Signin'
 import Dashboard from './pages/Dashboard'
 import FourOFour from './pages/FourOFour'
+import ProtectedRoute from './components/ProtectedRoute'
+import PublicRoute from './components/PublicRoute'
 
 const App = () => {
   return (
@@ -29,16 +31,28 @@ const App = () => {
       <Route path='/contact' element={<Contact/>}></Route>
       <Route path='/contacts' element={<Navigate to='/contact' replace/>}></Route>
 
-      <Route path='/signup' element={<Signup/>}></Route>
+      <Route path='/signup' element={
+        <PublicRoute>
+          <Signup/>
+        </PublicRoute>
+      }></Route>
       <Route path='/register' element={<Navigate to='/signup' replace/>}></Route>
       <Route path='/sign-up' element={<Navigate to='/signup' replace/>}></Route>
 
-      <Route path='/signin' element={<Signin/>}></Route>
+      <Route path='/signin' element={
+        <PublicRoute>
+          <Signin/>
+        </PublicRoute>
+      }></Route>
       <Route path='/login' element={<Navigate to='/signin' replace/>}></Route>
       <Route path='/log-in' element={<Navigate to='/signin' replace/>}></Route>
       <Route path='/sign-in' element={<Navigate to='/signin' replace/>}></Route>
 
-      <Route path='/dashboard' element={<Dashboard/>}></Route>
+      <Route path='/dashboard' element={
+        <ProtectedRoute>
+          <Dashboard/>
+        </ProtectedRoute>
+      }></Route>
       <Route path='/dashboards' element={<Navigate to='/dashboard' replace/>}></Route>
   
       <Route path='*' element={<FourOFour/>}></Route>
