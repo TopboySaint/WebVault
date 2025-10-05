@@ -50,12 +50,12 @@ const Signup = () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200 p-6">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-10 border border-blue-100 mx-4">
-        <h2 className="text-4xl font-extrabold text-blue-800 mb-8 text-center tracking-wide drop-shadow-lg" style={{ fontFamily: 'Montserrat, Arial, sans-serif' }}>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200 px-4 py-6 sm:p-6">
+      <div className="w-full max-w-md sm:max-w-lg bg-white rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl p-6 sm:p-10 border border-blue-100 mx-auto">
+        <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-800 mb-6 sm:mb-8 text-center tracking-tight sm:tracking-wide drop-shadow-lg" style={{ fontFamily: 'Montserrat, Arial, sans-serif' }}>
           Open Your WebVault Bank Account
         </h2>
-        <form className="space-y-6" onSubmit={formik.handleSubmit}>
+        <form className="space-y-5 sm:space-y-6" onSubmit={formik.handleSubmit}>
           {serverError && (
             <div className="text-red-600 text-base mb-4 text-center font-semibold bg-red-50 border border-red-200 rounded-lg py-2 px-4">
               {serverError}
@@ -175,8 +175,8 @@ const Signup = () => {
             )}
           </button>
         </form>
-        <p className="mt-8 text-xs text-gray-500 text-center">By opening an account, you agree to WebVault's <span className='underline'>Terms & Conditions</span> and <span className='underline'>Privacy Policy</span>.</p>
-        <p className="mt-4 text-sm text-gray-700 text-center">
+        <p className="mt-6 sm:mt-8 text-[10px] sm:text-xs text-gray-500 text-center leading-snug sm:leading-normal">By opening an account, you agree to WebVault's <span className='underline'>Terms & Conditions</span> and <span className='underline'>Privacy Policy</span>.</p>
+        <p className="mt-4 text-xs sm:text-sm text-gray-700 text-center">
           Already have an account?{' '}
           <Link to="/signin" className="text-blue-700 underline font-semibold hover:text-blue-900 transition">
             Sign in
