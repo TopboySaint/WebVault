@@ -8,6 +8,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const url = "https://webvault-9uhh.onrender.com/signup";
   const [serverError, setServerError] = useState("");
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -28,6 +29,7 @@ const Signup = () => {
     }),
     onSubmit: async values => {
       setServerError("");
+      setIsCreatingAccount(true);
       try {
         const res = await axios.post(url, values);
         if (res.status === 201) {
@@ -40,6 +42,8 @@ const Signup = () => {
           setServerError("Can't perform this action right now");
         }
         console.log(err);
+      } finally {
+        setIsCreatingAccount(false);
       }
     }
   });
@@ -159,9 +163,20 @@ const Signup = () => {
           </div>
           <button
             type="submit"
-            className="w-full py-3 bg-blue-700 text-white text-lg font-bold rounded-lg hover:bg-blue-800 transition shadow-md"
+            className="w-full py-3 bg-blue-700 text-white text-lg font-bold rounded-lg hover:bg-blue-800 transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            disabled={isCreatingAccount}
           >
-            Open Account
+            {isCreatingAccount ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Account...
+              </>
+            ) : (
+              'Open Account'
+            )}
           </button>
         </form>
         <p className="mt-8 text-xs text-gray-500 text-center">By opening an account, you agree to WebVault's <span className='underline'>Terms & Conditions</span> and <span className='underline'>Privacy Policy</span>.</p>
